@@ -57,6 +57,23 @@ describe('Shopping List', function() {
           });
   });
 
+  it('', function(done){
+          chai.request(app)
+          .delete('/items/1')
+          .end(function(err, res){
+            should.equal(err, null);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.body.should.be.a('object');
+            res.body.should.have.property('name');
+            res.body.should.have.property('id');
+            res.body.name.should.be.a('string');
+            res.body.id.should.be.a('number');
+            res.body.name.should.equal('Broad beans');
+            done();
+          });
+  });
+
   it('should add an item on post');
   it('should edit an item on put');
   it('should delete an item on delete');
