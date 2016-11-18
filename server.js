@@ -79,9 +79,7 @@ app.delete('/items/:id', function(req, res) {
     res.status(200).json(item);
 });
 
-// app.listen(process.env.PORT || 8080);
-
-var listener = app.listen(process.env.PORT || 8080, function () {
+app.listen(process.env.PORT || 8080, function () {
  console.log('Your app is listening on port ' +
   (listener.address().port || 8080));
 });
