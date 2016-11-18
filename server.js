@@ -48,6 +48,7 @@ var jsonParser = bodyParser.json();
 
 app.get('/items', function(req, res) {
     res.json(storage.items);
+    console.log(storage);
 });
 
 app.post('/items', jsonParser, function(req, res) {

@@ -8,70 +8,95 @@ var storage = server.storage;
 
 chai.use(chaiHttp);
 
+
 describe('Shopping List', function() {
+  beforeEach(function() {
+    storage.setId = 4;
+    storage.items = [
+      { id: 1, name: 'Broad beans' },
+      { id: 2, name: 'Tomatoes' },
+      { id: 3, name: 'Peppers' }
+    ];
+  });
 
   it('should list items on GET', function(done) {
     chai.request(app)
-      .get('/items')
-      .end(function(err, res) {
-        should.equal(err, null);
-        res.should.have.status(200);
-        res.should.be.json;
-        res.body.should.be.a('array');
-        res.body.should.have.length(3);
-        res.body[0].should.be.a('object');
-        res.body[0].should.have.property('id');
-        res.body[0].should.have.property('name');
-        res.body[0].id.should.be.a('number');
-        res.body[0].name.should.be.a('string');
-        res.body[0].name.should.equal('Broad beans');
-        res.body[1].name.should.equal('Tomatoes');
-        res.body[2].name.should.equal('Peppers');
-        done();
-      });
+    .get('/items')
+    .end(function(err, res) {
+      should.equal(err, null);
+      res.should.have.status(200);
+      res.should.be.json;
+      res.body.should.be.a('array');
+      res.body.should.have.length(3);
+      res.body[0].should.be.a('object');
+      res.body[0].should.have.property('id');
+      res.body[0].should.have.property('name');
+      res.body[0].id.should.be.a('number');
+      res.body[0].name.should.be.a('string');
+      res.body[0].name.should.equal('Broad beans');
+      res.body[1].name.should.equal('Tomatoes');
+      res.body[2].name.should.equal('Peppers');
+      done();
+    });
   });
 
   it('should add an item on POST', function(done) {
-      chai.request(app)
-          .post('/items')
-          .send({'name': 'Kale'})
-          .end(function(err, res) {
-              should.equal(err, null);
-              res.should.have.status(201);
-              res.should.be.json;
-              res.body.should.be.a('object');
-              res.body.should.have.property('name');
-              res.body.should.have.property('id');
-              res.body.name.should.be.a('string');
-              res.body.id.should.be.a('number');
-              res.body.name.should.equal('Kale');
-              storage.items.should.be.a('array');
-              storage.items.should.have.length(4);
-              storage.items[3].should.be.a('object');
-              storage.items[3].should.have.property('id');
-              storage.items[3].should.have.property('name');
-              storage.items[3].id.should.be.a('number');
-              storage.items[3].name.should.be.a('string');
-              storage.items[3].name.should.equal('Kale');
-              done();
-          });
+    chai.request(app)
+    .post('/items')
+    .send({'name': 'Kale'})
+    .end(function(err, res) {
+      should.equal(err, null);
+      res.should.have.status(201);
+      res.should.be.json;
+      res.body.should.be.a('object');
+      res.body.should.have.property('name');
+      res.body.should.have.property('id');
+      res.body.name.should.be.a('string');
+      res.body.id.should.be.a('number');
+      res.body.name.should.equal('Kale');
+      storage.items.should.be.a('array');
+      storage.items.should.have.length(4);
+      storage.items[3].should.be.a('object');
+      storage.items[3].should.have.property('id');
+      storage.items[3].should.have.property('name');
+      storage.items[3].id.should.be.a('number');
+      storage.items[3].name.should.be.a('string');
+      storage.items[3].name.should.equal('Kale');
+      done();
+    });
   });
 
-  it('', function(done){
-          chai.request(app)
-          .delete('/items/1')
-          .end(function(err, res){
-            should.equal(err, null);
-            res.should.have.status(200);
-            res.should.be.json;
-            res.body.should.be.a('object');
-            res.body.should.have.property('name');
-            res.body.should.have.property('id');
-            res.body.name.should.be.a('string');
-            res.body.id.should.be.a('number');
-            res.body.name.should.equal('Broad beans');
-            done();
-          });
+  it('should delete an item', function(done){
+    chai.request(app)
+    .delete('/items/1')
+    .end(function(err, res){
+      should.equal(err, null);
+      res.should.have.status(200);
+      res.should.be.json;
+      res.body.should.be.a('object');
+      res.body.should.have.property('name');
+      res.body.should.have.property('id');
+      res.body.name.should.be.a('string');
+      res.body.id.should.be.a('number');
+      res.body.name.should.equal('Broad beans');
+      // let's now check the storage object, to make sure it looks like what it should after the deletion
+      // ?? what should storage look like / have left in it after the deletion?
+      storage.should.be.an('object');
+      storage.items.should.be.an('array');
+      storage.items.should.have.length(2);
+      storage.items[0].should.have.property('name');
+      storage.items[0].should.have.property('id');
+      storage.items[0].name.should.not.equal('Broad beans');
+      storage.items[0].name.should.equal('Tomatoes');
+      storage.items[1].name.should.equal('Peppers');
+
+      // storage = { items: [ { name: 'Tomatoes', id: 2 },
+      //                      { name: 'Peppers', id: 3 },
+      //                      { name: 'Kale', id: 4 } ],
+      //             setId: 5 }
+
+      done();
+    });
   });
 
   it('should add an item on post');
