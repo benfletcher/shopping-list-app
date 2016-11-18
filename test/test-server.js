@@ -89,17 +89,34 @@ describe('Shopping List', function() {
       storage.items[0].name.should.not.equal('Broad beans');
       storage.items[0].name.should.equal('Tomatoes');
       storage.items[1].name.should.equal('Peppers');
-
-      // storage = { items: [ { name: 'Tomatoes', id: 2 },
-      //                      { name: 'Peppers', id: 3 },
-      //                      { name: 'Kale', id: 4 } ],
-      //             setId: 5 }
-
       done();
     });
   });
 
-  it('should add an item on post');
+  it('should edit an item on put', function(done){
+      chai.request(app)
+        .put('/items/1')
+        .send({name: 'pole beans', id: 1})
+        .end(function(err, res){
+          should.equal(err, null);
+          res.should.have.status(200);
+          res.should.be.json;
+          res.body.should.be.a('object');
+          res.body.should.have.property('name');
+          res.body.should.have.property('id');
+          res.body.name.should.equal('pole beans');
+          res.body.id.should.equal(1);
+
+          storage.items.should.be.a('array');
+          storage.items.should.have.length(3);
+          // make sure that the storage object relfects the change
+          // to say poll beans / updated
+          storage.items[0].name.should.equal('pole beans');
+          storage.items[0].id.should.equal(1);
+        done();
+      });
+  });
+
   it('should edit an item on put');
   it('should delete an item on delete');
 
