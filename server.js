@@ -10,20 +10,20 @@ var Storage = {
   },
   edit: function(id, name) {
     for (var i=0; i<this.items.length; i++) {
-        var item = this.items[i];
-        if (id == item.id) {
-            item.name = name;
-            return item;
-        }
+      var item = this.items[i];
+      if (id == item.id) {
+        item.name = name;
+        return item;
+      }
     }
   },
   delete: function(id) {
     for (var i=0; i<this.items.length; i++) {
-        var item = this.items[i];
-        if (id == item.id) {
-            this.items.splice(i, 1);
-            return item;
-        }
+      var item = this.items[i];
+      if (id == item.id) {
+        this.items.splice(i, 1);
+        return item;
+      }
     }
   }
 };
@@ -47,41 +47,41 @@ app.use(express.static('public'));
 var jsonParser = bodyParser.json();
 
 app.get('/items', function(req, res) {
-    res.json(storage.items);
-    console.log(storage);
+  res.json(storage.items);
+  console.log(storage);
 });
 
 app.post('/items', jsonParser, function(req, res) {
-    if (!req.body) {
-        return res.sendStatus(400);
-    }
+  if (!req.body || !req.body.name) {
+    return res.sendStatus(400);
+  }
 
-    var item = storage.add(req.body.name);
-    res.status(201).json(item);
+  var item = storage.add(req.body.name);
+  res.status(201).json(item);
 });
 
 app.put('/items/:id', jsonParser, function(req, res) {
-    if (!req.body) {
-        return res.sendStatus(400);
-    }
+  if (!req.body) {
+    return res.sendStatus(400);
+  }
 
-    var item = storage.edit(req.params.id, req.body.name);
-    if (!item) {
-        return res.sendStatus(404);
-    }
-    res.status(200).json(item);
+  var item = storage.edit(req.params.id, req.body.name);
+  if (!item) {
+    return res.sendStatus(404);
+  }
+  res.status(200).json(item);
 });
 
 app.delete('/items/:id', function(req, res) {
-    var item = storage.delete(req.params.id);
-    if (!item) {
-        return res.sendStatus(404);
-    }
-    res.status(200).json(item);
+  var item = storage.delete(req.params.id);
+  if (!item) {
+    return res.sendStatus(404);
+  }
+  res.status(200).json(item);
 });
 
 listener = app.listen(process.env.PORT || 8080, function () {
- console.log('Your app is listening on port ' +
+  console.log('Your app is listening on port ' +
   (listener.address().port || 8080));
 });
 

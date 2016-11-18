@@ -66,6 +66,18 @@ describe('Shopping List', function() {
     });
   });
 
+  it('should properly fail on empty POST', function(done) {
+    chai.request(app)
+    .post('/items')
+    .send({name: ''})
+    .end(function(err, res) {
+      err.should.be.a('error');
+      res.should.have.status(400);
+      storage.items.should.have.length(3);
+      done();
+    });
+  });
+
   it('should delete an item', function(done){
     chai.request(app)
     .delete('/items/1')
@@ -93,34 +105,40 @@ describe('Shopping List', function() {
     });
   });
 
-  it('should edit an item on put', function(done){
-      chai.request(app)
-        .put('/items/1')
-        .send({name: 'pole beans', id: 1})
-        .end(function(err, res){
-          should.equal(err, null);
-          res.should.have.status(200);
-          res.should.be.json;
-          res.body.should.be.a('object');
-          res.body.should.have.property('name');
-          res.body.should.have.property('id');
-          res.body.name.should.equal('pole beans');
-          res.body.id.should.equal(1);
-
-          storage.items.should.be.a('array');
-          storage.items.should.have.length(3);
-          // make sure that the storage object relfects the change
-          // to say poll beans / updated
-          storage.items[0].name.should.equal('pole beans');
-          storage.items[0].id.should.equal(1);
-        done();
-      });
+  it('should properly fail when deleting a non-existent item', function(done){
+    chai.request(app)
+    .delete('/items/9')
+    .end(function(err, res){
+      err.should.be.a('error');
+      res.should.have.status(404);
+      storage.items.should.have.length(3);
+      done();
+    });
   });
 
-  it('should edit an item on put');
-  it('should delete an item on delete');
+  it('should edit an item on put', function(done){
+    chai.request(app)
+    .put('/items/1')
+    .send({name: 'pole beans', id: 1})
+    .end(function(err, res){
+      should.equal(err, null);
+      res.should.have.status(200);
+      res.should.be.json;
+      res.body.should.be.a('object');
+      res.body.should.have.property('name');
+      res.body.should.have.property('id');
+      res.body.name.should.equal('pole beans');
+      res.body.id.should.equal(1);
+      storage.items.should.be.a('array');
+      storage.items.should.have.length(3);
+      // make sure that the storage object relfects the change
+      // to say poll beans / updated
+      storage.items[0].name.should.equal('pole beans');
+      storage.items[0].id.should.equal(1);
+      done();
+    });
+  });
 
-  it('should POST to an ID that exists');
   it('should POST without body data');
   it('should POST with something other than valid JSON');
 
