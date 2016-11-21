@@ -1,90 +1,98 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
 
-var Storage = {
-  add: function(name) {
-    var item = {name: name, id: this.setId};
-    this.items.push(item);
-    this.setId += 1;
-    return item;
-  },
-  edit: function(id, name) {
-    for (var i=0; i<this.items.length; i++) {
-      var item = this.items[i];
-      if (id == item.id) {
-        item.name = name;
-        return item;
-      }
-    }
-  },
-  delete: function(id) {
-    for (var i=0; i<this.items.length; i++) {
-      var item = this.items[i];
-      if (id == item.id) {
-        this.items.splice(i, 1);
-        return item;
-      }
-    }
-  }
-};
-
-var createStorage = function() {
-  var storage = Object.create(Storage);
-  storage.items = [];
-  storage.setId = 1;
-  return storage;
-}
-
-var storage = createStorage();
-
-storage.add('Broad beans');
-storage.add('Tomatoes');
-storage.add('Peppers');
+var config = require('./config');
 
 var app = express();
+
+app.use(bodyParser.json());
 app.use(express.static('public'));
 
-var jsonParser = bodyParser.json();
+var Item = require('./models/item');
 
 app.get('/items', function(req, res) {
-  res.json(storage.items);
-  console.log(storage);
+    Item.find(function(err, items) {
+        if (err) {
+            return res.status(500).json({
+                message: 'Internal Server Error'
+            });
+        }
+        res.json(items);
+    });
 });
 
-app.post('/items', jsonParser, function(req, res) {
-  if (!req.body || !req.body.name) {
-    return res.sendStatus(400);
-  }
-
-  var item = storage.add(req.body.name);
-  res.status(201).json(item);
+app.post('/items', function(req, res) {
+  console.log(req.body);
+    Item.create({
+        name: req.body.name
+    }, function(err, item) {
+        if (err) {
+            return res.status(500).json({
+                message: 'Internal Server Error'
+            });
+        }
+        res.status(201).json(item);
+    });
 });
 
-app.put('/items/:id', jsonParser, function(req, res) {
-  if (!req.body) {
-    return res.sendStatus(400);
-  }
-
-  var item = storage.edit(req.params.id, req.body.name);
-  if (!item) {
-    return res.sendStatus(404);
-  }
-  res.status(200).json(item);
+app.put('/items/:id', function(req, res){
+  // console.log(req.params.id);
+  // console.log(req.body);
+    Item.findOneAndUpdate(req.params.id,
+      {name: req.body.name},
+        function(err, item) {
+          if (err) {
+            return res.status(500).json({
+              message: 'Internal Server Error'
+            });
+          }
+          res.status(201).json(item);
+      });
 });
 
-app.delete('/items/:id', function(req, res) {
-  var item = storage.delete(req.params.id);
-  if (!item) {
-    return res.sendStatus(404);
-  }
-  res.status(200).json(item);
+app.delete('/items/:id', function(req, res){
+    Item.findOneAndRemove(req.params.id,
+      function(err, item) {
+        if (err) {
+          return res.status(500).json({
+            message:  'Internal Server Error'
+          });
+        }
+          res.status(201).json(item);
+      }
+    );
 });
 
-listener = app.listen(process.env.PORT || 8080, function () {
-  console.log('Your app is listening on port ' +
-  (listener.address().port || 8080));
+// console.log(app);
+app.use('*', function(req, res) {
+    res.status(404).json({
+        message: 'Not Found'
+    });
 });
 
-//exports go here
+var runServer = function(callback) {
+    mongoose.connect(config.DATABASE_URL, function(err) {
+        if (err && callback) {
+            return callback(err);
+        }
+
+        app.listen(config.PORT, function() {
+            console.log('Listening on localhost:' + config.PORT);
+            if (callback) {
+                callback();
+            }
+        });
+    });
+};
+
+if (require.main === module) {
+    runServer(function(err) {
+        if (err) {
+            console.error(err);
+        }
+    });
+}
+
 exports.app = app;
-exports.storage = storage;
+exports.runServer = runServer;
