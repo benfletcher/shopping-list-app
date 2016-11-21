@@ -64,7 +64,7 @@ app.delete('/items/:id', function(req, res){
     );
 });
 
-// console.log(app);
+console.log(app);
 app.use('*', function(req, res) {
     res.status(404).json({
         message: 'Not Found'
